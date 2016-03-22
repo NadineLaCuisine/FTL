@@ -8,7 +8,7 @@ TODO for malfoy part -> index/anchoring
 
 
 TOUDOU for camille part -> mapping/alignment
--add SSW
+-improve SSW
 -add bowtie/bwa like mapping
 -produce a score instead of a bool
 -produce SAM output or alignement output

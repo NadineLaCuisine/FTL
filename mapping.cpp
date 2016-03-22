@@ -46,13 +46,13 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 	uint i(0);
     uint bestScore(6);
 	do{
-		// cout<<"i "<<i<<endl;
 		if(kmer2pos.count(kmer)!=0){
 			vector<position> positions(kmer2pos[kmer]);
 			for(uint j(0);j<positions.size() and not mapped;++j){
 				int possrt(positions[j]-i);
 				if(possrt>=0){
-                    uint score(distHamming(read,ref.substr(possrt,read.size()),maxMiss));
+                    //~ uint score(distHamming(read,ref.substr(possrt,read.size()),maxMiss));
+                    uint score(nbMismatchesSW(read, ref.substr(possrt,read.size())));
 					if(score<maxMiss){
                         corrected=ref.substr(possrt,read.size());
 					    bestScore=score;
@@ -81,7 +81,6 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
 	while(!readS.eof()){
 		getline(readS,useless);
 		getline(readS,read);
-		// bool mapped=false;
 		if(read.empty()){
 			break;
 		}
