@@ -34,9 +34,10 @@ uint64_t inANotInB(unordered_set<minimizer>& set1,unordered_set<minimizer>& set2
 uint64_t interSet(unordered_set<minimizer>& set1,unordered_set<minimizer>& set2);
 string getRead(ifstream& readFile);
 unordered_map<minimizer,uint64_t > kmerCounting(const string& readFile, const uint64_t k);
-void fillIndex(const string& readFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos);
-void mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref);
 void readCounting(const string& readFile);
+void updateMinimizerRC(minimizer&	min, char nuc, uint64_t k);
+void updateMinimizer(minimizer&	min, char nuc, uint64_t k);
+minimizer seq2intStranded(const string& seq);
 
 
 #endif

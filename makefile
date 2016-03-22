@@ -19,7 +19,7 @@ EXEC=ftl
 
 all: $(EXEC)
 
-ftl: ftl.o  utils.o mapping.o
+ftl: ftl.o  utils.o mapping.o distances.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 ftl.o: main.cpp  utils.h mapping.h
@@ -28,7 +28,10 @@ ftl.o: main.cpp  utils.h mapping.h
 utils.o: utils.cpp utils.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-mapping.o: mapping.cpp utils.h
+distances.o: distances.cpp distances.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+mapping.o: mapping.cpp utils.h mapping.h distances.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:

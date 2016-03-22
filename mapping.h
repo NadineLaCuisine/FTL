@@ -15,7 +15,8 @@
 using namespace std;
 
 
-bool isMappedHamming(const  string& read, const string& reference, uint maxMissmatch);
+void fillIndex(const string& readFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos);
+uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss);
 
 
 
