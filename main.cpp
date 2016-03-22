@@ -2,6 +2,7 @@
 #include <fstream>
 #include <chrono>
 
+#include <getopt.h>
 
 using namespace std;
 

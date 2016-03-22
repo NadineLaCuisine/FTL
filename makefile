@@ -1,7 +1,7 @@
 CC=/usr/bin/g++
 # CC=g++
 CFLAGS=  -Wall  -Ofast -std=c++11 -march=native -pthread -pipe
-LDFLAGS=-pthread -pipe
+LDFLAGS=-pthread -pipe -flto
 
 
 ifeq ($(gprof),1)
