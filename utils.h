@@ -36,6 +36,7 @@ string getRead(ifstream& readFile);
 unordered_map<minimizer,uint64_t > kmerCounting(const string& readFile, const uint64_t k);
 void fillIndex(const string& readFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos);
 void mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref);
+void readCounting(const string& readFile);
 
 
 #endif

@@ -15,7 +15,7 @@
 using namespace std;
 
 
-bool isMappedHamming( string& read, const string& reference, uint maxMissmatch);
+bool isMappedHamming(const  string& read, const string& reference, uint maxMissmatch);
 
 
 

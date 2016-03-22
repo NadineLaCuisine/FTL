@@ -12,7 +12,7 @@
 using namespace std;
 
 
-bool isMappedHamming( string& read, const string& reference, uint maxMissmatch){
+bool isMappedHamming(const string& read, const string& reference, uint maxMissmatch){
     uint error(0);
     for(uint i(0);i<read.size();++i){
         if(read[i]!=reference[i]){

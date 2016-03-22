@@ -494,6 +494,39 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 }
 
 
+bool mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref){
+	minimizer kmerS(seq2intStranded((read.substr(0,k))));
+	minimizer kmerRC(rc(kmerS,k));
+	minimizer kmer(min(kmerRC,kmerS));
+	bool end(false),mapped(false);
+	uint i(0);
+	do{
+		// cout<<"i "<<i<<endl;
+		if(kmer2pos.count(kmer)!=0){
+			vector<position> positions(kmer2pos[kmer]);
+			for(uint j(0);j<positions.size() and not mapped;++j){
+				int possrt(positions[j]-i);
+				if(possrt>=0){
+					if(isMappedHamming(read,ref.substr(possrt,read.size()),5)){
+						mapped=true;
+						break;
+					}
+				}
+			}
+		}
+		if(i+k<read.size()){
+			updateMinimizer(kmerS, read[i+k], k);
+			updateMinimizerRC(kmerRC, read[i+k], k);
+			kmer=min(kmerRC,kmerS);
+			++i;
+		}else{
+			end=true;
+		}
+	}while(not end and not mapped);
+	return mapped;
+}
+
+
 void mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref){
 	ifstream readS(readFile);
 	string read,useless,comp;
@@ -501,55 +534,45 @@ void mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
 	while(!readS.eof()){
 		getline(readS,useless);
 		getline(readS,read);
-		comp=reversecomplement(read);
-		bool mapped=false;
+		// bool mapped=false;
 		if(read.empty()){
 			break;
 		}
 		++readNumber;
-		// cout<<read<<endl;
-		minimizer kmerS(seq2intStranded((read.substr(0,k))));
-		minimizer kmerRC(rc(kmerS,k));
-		minimizer kmer(min(kmerRC,kmerS));
-		bool end(false);
-		uint i(0);
-		do{
-			// cout<<"i "<<i<<endl;
-			if(kmer2pos.count(kmer)!=0){
-				vector<position> positions(kmer2pos[kmer]);
-				for(uint j(0);j<positions.size() and not mapped;++j){
-					int possrt(positions[j]-i);
-					if(possrt>=0){
-						if(isMappedHamming(read,ref.substr((positions[j]-i),read.size()),5)){
-							++mappedRead;
-							mapped=true;
-							break;
-						}
-					}else{
-						int posrc(positions[j]-(read.size()-i-k));
-						if(posrc>=0){
-							if(isMappedHamming(comp,ref.substr(posrc,read.size()),5)){
-								++mappedRead;
-								++mappedRC;
-								mapped=true;
-								break;
-							}
-						}
-					}
-				}
+		if(mapRead(read,  k, kmer2pos, ref)){
+			++mappedRead;
+		}else{
+			if(mapRead(reversecomplement(read),  k, kmer2pos, ref)){
+				++mappedRead;
+				++mappedRC;
 			}
-			if(i+k<read.size()){
-				updateMinimizer(kmerS, read[i+k], k);
-				updateMinimizerRC(kmerRC, read[i+k], k);
-				kmer=min(kmerRC,kmerS);
-				++i;
-			}else{
-				end=true;
-			}
-		}while(not end and not mapped);
+		}
+
 	}
-	cout<<mappedRead<<endl;
-	cout<<readNumber<<endl;
-	cout<<mappedRC<<endl;
-	cout<<((10000*(double)mappedRead)/readNumber)/100<<endl;
+	cout<<"Reads: "<<readNumber<<endl;
+	cout<<"Reads mapped: "<<mappedRead<<endl;
+	cout<<"Percent Read mapped: "<<((10000*(double)mappedRead)/readNumber)/100<<"%"<<endl;
+}
+
+
+void readCounting(const string& readFile){
+	uint count(0);
+	FILE * pFile;
+	long lSize;
+	char * buffer;
+	size_t result;
+	pFile = fopen ( readFile.c_str() , "rb" );
+	fseek (pFile , 0 , SEEK_END);
+ 	lSize = ftell (pFile);
+	buffer = (char*) malloc (sizeof(char)*lSize);
+	rewind (pFile);
+	result = fread (buffer,1,lSize,pFile);
+	if (result != lSize) {fputs ("Reading error",stderr); exit (3);}
+	for(uint i(0);i<lSize;++i){
+		// cout<<buffer[i]<<endl;
+		if(buffer[i]=='>'){
+			++count;
+		}
+	}
+	cout<<count<<endl;
 }

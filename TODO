@@ -1,9 +1,12 @@
 TODO for malfoy part -> index/anchoring
 -replace hash table with MPHF
--better gestion of reversecomplement (now it is completly useless, use mutaread dude ...)
+-opti gestion of reversecomplement
 -try to index a fraction of the reference kmer to see the impact on mapping
 -replace kmer counting by kmc2
--manage optimal/multi mapping
+-manage optimal/multi mapping PRIORITY
+-correction mode  PRIORITY
+-do not map on N  PRIORITY
+-multhithreading
 
 
 TOUDOU for camille part -> mapping/alignment
