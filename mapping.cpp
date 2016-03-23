@@ -25,7 +25,6 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 	bool end(false);
 	do{
 		kmer2pos[kmer].push_back(i);
-		cout<<seq.substr(i,k)<<" "<<i<<endl;
 		if(seq[i+k]=='N'){
 			i+=k;
 			do{++i;}while(seq[i]=='N');

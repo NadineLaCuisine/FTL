@@ -3,7 +3,6 @@ TODO for malfoy part -> index/anchoring
 -opti gestion of reversecomplement
 -try to index a fraction of the reference kmer to see the impact on mapping
 -replace kmer counting by kmc2
--do not map on N  PRIORITY
 -multhithreading
 
 
