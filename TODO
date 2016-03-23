@@ -4,6 +4,7 @@ TODO for malfoy part -> index/anchoring
 -try to index a fraction of the reference kmer to see the impact on mapping
 -replace kmer counting by kmc2
 -multhithreading
+-exposing more parameters in command line (hamming vs ssw and maybe missrate)
 
 
 TOUDOU for camille part -> mapping/alignment
@@ -11,7 +12,7 @@ TOUDOU for camille part -> mapping/alignment
 -add bowtie/bwa like mapping
 -produce a score instead of a bool
 -produce SAM output or alignement output
-
+-adding folders 
 
 DOUDOU for Simon part -> scripting
 -Produce bench and keep track of performances/correctness through the commit ?
