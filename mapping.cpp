@@ -13,7 +13,6 @@
 using namespace std;
 
 
-
 void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos){
 	string seq;
 	ifstream readS(refFile);
@@ -26,7 +25,14 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 	bool end(false);
 	do{
 		kmer2pos[kmer].push_back(i);
-		if(i+k<seq.size()){
+		cout<<seq.substr(i,k)<<" "<<i<<endl;
+		if(seq[i+k]=='N'){
+			i+=k;
+			do{++i;}while(seq[i]=='N');
+			kmerS=(seq2intStranded((seq.substr(i,k))));
+			kmerRC=(rc(kmerS,k));
+			kmer=(min(kmerRC,kmerS));
+		}else if(i+k<seq.size()){
 			updateMinimizer(kmerS, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
 			kmer=min(kmerRC,kmerS);

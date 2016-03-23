@@ -445,18 +445,15 @@ void updateMinimizerRC(minimizer&	min, char nuc, uint64_t k){
 	min+=((3-nuc2int(nuc))<<(2*k-2));
 }
 
-unordered_map<minimizer,uint64_t > kmerCounting(const string& readFile, const uint64_t k){
-	unordered_map<minimizer,uint64_t > count;
-	string seq;
-	ifstream readS(readFile);
-	getline(readS,seq);
+unordered_map<minimizer,uint8_t> kmerCounting(const string& seq, const uint k){
+	unordered_map<minimizer,uint8_t > count;
 	uint64_t i(0);
 	minimizer kmerS(seq2intStranded((seq.substr(0,k))));
 	minimizer kmerRC(rc(kmerS,k));
 	minimizer kmer(min(kmerRC,kmerS));
 	bool end(false);
 	do{
-		count[kmer]=min(count[kmer]+1,(uint64_t)200);
+		count[kmer]=min(count[kmer]+1,200);
 		if(i+k<seq.size()){
 			updateMinimizer(kmerS, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);

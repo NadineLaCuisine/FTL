@@ -42,8 +42,8 @@ int main(int argc, char ** argv){
 	ifstream in(refFile);
 	getline(in,ref);
 	getline(in,ref);
-	cout<<"Counting "<<k<<"mers "<<endl;
-	unordered_map<kmer,uint64_t> count(kmerCounting(ref, k));
+	// cout<<"Counting "<<k<<"mers "<<endl;
+	// unordered_map<kmer,uint8_t> count(kmerCounting(ref, k));
 	cout<<"Filling index of "<<refFile<<endl;
 	unordered_map<kmer,vector<position>> kmer2pos;
 	fillIndex(refFile, k, kmer2pos);
