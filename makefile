@@ -14,6 +14,11 @@ CFLAGS=-std=c++0x -O3 -g
 LDFLAGS=-g
 endif
 
+ifeq ($(polly),1)
+CFLAGS+= -Xclang -load -Xclang /local/polly/llvm_build/lib/LLVMPolly.so -mllvm -polly -mllvm -polly-vectorizer=stripmine
+CC=/local/polly/llvm_build/bin/clang
+endif
+
 
 EXEC=ftl
 
