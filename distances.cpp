@@ -12,16 +12,49 @@
 
 using namespace std;
 
+ofstream out("debug.txt");
 
 uint distHamming(const string& read, const string& reference, uint maxMissmatch){
     uint error(0);
     for(uint i(0);i<read.size();++i){
+        if(reference[i]==':'){return maxMissmatch+1;}
         if(read[i]!=reference[i]){
             if(++error>maxMissmatch){
                 return error;
             }
         }
     }
+    return error;
+}
+
+
+uint distHammingIndel(const string& read, const string& reference, uint maxMissmatch){
+    // out<<"beg"<<endl;;
+    uint error(0);
+    for(uint i(0);i<read.size();++i){
+        if(reference[i]==':'){return maxMissmatch+1;}
+        if(read[i]!=reference[i]){
+            if(i==read.size()-1){return ++error;}
+            if(read[i+1]==reference[i+1]){//missmatch
+                if(++error>maxMissmatch){
+                    return error;
+                }
+            }else if(read[i+1]==reference[i]){//insertion
+                if(i+2>=read.size() or i+1>=reference.size()){
+                    return ++error;
+                }
+                // out<<"here"<<endl;;
+                return distHamming(read.substr(i+2), reference.substr(i+1), maxMissmatch-error-1);
+            }else if(read[i]==reference[i+1]){//deletion
+                // out<<"there"<<endl;;
+                if(i+2>=reference.size() or i+1>=read.size()){
+                    return ++error;
+                }
+                return distHamming(read.substr(i+1), reference.substr(i+2), maxMissmatch-error-1);
+            }
+        }
+    }
+    // out<<"ret"<<endl;;
     return error;
 }
 
@@ -66,5 +99,3 @@ int32_t nbMismatchesSW(const string& ref, const string& query){
   aligner.Align(query.c_str(), ref.c_str(), ref.size(), filter, &alignment);
   return alignment.mismatches;
 }
-
-

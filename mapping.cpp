@@ -56,7 +56,7 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 			for(uint j(0);j<positions.size() and not mapped;++j){
 				int possrt(positions[j]-i);
 				if(possrt>=0){
-                    uint score(distHamming(read,ref.substr(possrt,read.size()),maxMiss));  // hamming
+                    uint score(distHammingIndel(read,ref.substr(possrt,read.size()+10),maxMiss));  // hamming
                     //~ uint score(nbMismatchesSW(read, ref.substr(possrt,read.size())));  // smith waterman
 					if(score<maxMiss){
                         corrected=ref.substr(possrt,read.size());
@@ -79,7 +79,7 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 
 
 uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss){
-    ofstream out("out.fa");
+    ofstream mapped("mapped.fa"),notMapped("notMapped.fa");
 	ifstream readS(readFile);
 	string read,useless,comp,corrected,correctedRC;
 	uint mappedRead(0),readNumber(0);
@@ -95,10 +95,12 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
 		if(min(score,scorerc)<maxMiss){
             ++mappedRead;
 			if(score<scorerc){
-                out<<useless<<endl<<corrected<<endl;
+                mapped<<useless<<endl<<corrected<<endl;
             }else{
-                out<<useless<<endl<<correctedRC<<endl;
+                mapped<<useless<<endl<<correctedRC<<endl;
             }
+		}else{
+			notMapped<<useless<<endl<<correctedRC<<endl;
 		}
 
 	}
