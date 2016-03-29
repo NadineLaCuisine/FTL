@@ -35,22 +35,42 @@ uint distHammingIndel(const string& read, const string& reference, uint maxMissm
         if(reference[i]==':'){return maxMissmatch+1;}
         if(read[i]!=reference[i]){
             if(i==read.size()-1){return ++error;}
-            if(read[i+1]==reference[i+1]){//missmatch
+//            if(read[i+1]==reference[i+1]){//missmatch
+//                cout<<"Mismatch, nerrors : "<<to_string(error)<<endl;
+//                if(++error>maxMissmatch){
+//                    return error;
+//                }
+//            }else if(read[i+1]==reference[i]){//insertion
+//                cout<<"Insertion, nerrors : "<<to_string(error)<<endl;
+//                if(i+2>=read.size() or i+1>=reference.size()){
+//                    return ++error;
+//                }
+//                // out<<"here"<<endl;;
+//                return distHamming(read.substr(i+2), reference.substr(i+1), maxMissmatch-error-1);
+//            }else if(read[i]==reference[i+1]){//deletion
+//                cout<<"Deletion, nerrors : "<<to_string(error)<<endl;
+//                // out<<"there"<<endl;;
+//                if(i+2>=reference.size() or i+1>=read.size()){
+//                    return ++error;
+//                }
+//                return distHamming(read.substr(i+1), reference.substr(i+2), maxMissmatch-error-1);
+//            }
+            if(read[i+1]==reference[i]){//insertion
+                if(i+2>=read.size() or i+1>=reference.size() or ++error>maxMissmatch){
+                    return error;
+                }
+                // out<<"here"<<endl;;
+                return error + distHamming(read.substr(i+2), reference.substr(i+1), maxMissmatch-error);
+            }else if(read[i]==reference[i+1]){//deletion
+                // out<<"there"<<endl;;
+                if(i+2>=reference.size() or i+1>=read.size() or ++error>maxMissmatch){
+                    return error;
+                }
+                return error + distHamming(read.substr(i+1), reference.substr(i+2), maxMissmatch-error);
+            } else {//missmatch
                 if(++error>maxMissmatch){
                     return error;
                 }
-            }else if(read[i+1]==reference[i]){//insertion
-                if(i+2>=read.size() or i+1>=reference.size()){
-                    return ++error;
-                }
-                // out<<"here"<<endl;;
-                return distHamming(read.substr(i+2), reference.substr(i+1), maxMissmatch-error-1);
-            }else if(read[i]==reference[i+1]){//deletion
-                // out<<"there"<<endl;;
-                if(i+2>=reference.size() or i+1>=read.size()){
-                    return ++error;
-                }
-                return distHamming(read.substr(i+1), reference.substr(i+2), maxMissmatch-error-1);
             }
         }
     }
