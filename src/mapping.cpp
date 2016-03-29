@@ -49,7 +49,7 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
         minimizer kmer(min(kmerRC,kmerS));
         bool end(false),mapped(false);
         uint i(0);
-        uint bestScore(6);
+        uint bestScore(maxMiss);
         do{
                 if(kmer2pos.count(kmer)!=0){
                         vector<position> positions(kmer2pos[kmer]);
@@ -58,7 +58,7 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
                                 if(possrt>=0){
                     uint score(distHammingIndel(read,ref.substr(possrt,read.size()+10),maxMiss));  // hamming
                     //~ uint score(nbMismatchesSW(read, ref.substr(possrt,read.size())));  // smith waterman
-                                        if(score<maxMiss){
+                                        if(score<bestScore){
                         corrected=ref.substr(possrt,read.size());
                                             bestScore=score;
                                         }
