@@ -49,7 +49,7 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 	minimizer kmer(min(kmerRC,kmerS));
 	bool end(false),mapped(false);
 	uint i(0);
-    uint bestScore(6);
+        uint bestScore(6);
 	do{
 		if(kmer2pos.count(kmer)!=0){
 			vector<position> positions(kmer2pos[kmer]);
@@ -93,18 +93,19 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
         uint score(mapRead(read,  k, kmer2pos, ref,maxMiss,corrected));
         uint scorerc(mapRead(reversecomplement(read),  k, kmer2pos, ref,maxMiss,correctedRC));
 //        if(useless == ">2"){
-//        cout<<useless<<endl<<read<<endl<<corrected<<endl<<to_string(score)<<endl<<correctedRC<<endl<<to_string(scorerc)<<endl<<endl;
+//        cout<<"Read number : "<<useless<<endl<<"Read : "<<read<<endl<<"Corrected : "<<corrected<<endl<<"Score : "<<to_string(score)<<endl<<
+//              "Corrected RC : "<<correctedRC<<endl<<"Score : "<<to_string(scorerc)<<endl<<endl;
 //        }
 		if(min(score,scorerc)<maxMiss){
             ++mappedRead;
 			if(score<scorerc){
                 mapped<<useless<<endl<<corrected<<endl;
             }else{
-                mapped<<useless<<endl<<correctedRC<<endl;
+                mapped<<useless<<endl<<reversecomplement(correctedRC)<<endl;
             }
 		}else{
                     if (notAlignedSequence){
-                        notMapped<<useless<<endl<<reversecomplement(read)<<endl;
+                        notMapped<<useless<<endl<<read<<endl;
                     } else {
                         notMapped<<useless<<endl<<"not_aligned"<<endl;
                     }
