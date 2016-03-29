@@ -25,9 +25,9 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 	bool end(false);
 	do{
 		kmer2pos[kmer].push_back(i);
-		if(seq[i+k]=='N'){
+		if(seq[i+k]==':'){
 			i+=k;
-			do{++i;}while(seq[i]=='N');
+			do{++i;}while(seq[i]==':');
 			kmerS=(seq2intStranded((seq.substr(i,k))));
 			kmerRC=(rc(kmerS,k));
 			kmer=(min(kmerRC,kmerS));
