@@ -92,6 +92,9 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
 		++readNumber;
         uint score(mapRead(read,  k, kmer2pos, ref,maxMiss,corrected));
         uint scorerc(mapRead(reversecomplement(read),  k, kmer2pos, ref,maxMiss,correctedRC));
+//        if(useless == ">2"){
+//        cout<<useless<<endl<<read<<endl<<corrected<<endl<<to_string(score)<<endl<<correctedRC<<endl<<to_string(scorerc)<<endl<<endl;
+//        }
 		if(min(score,scorerc)<maxMiss){
             ++mappedRead;
 			if(score<scorerc){
@@ -101,7 +104,7 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
             }
 		}else{
                     if (notAlignedSequence){
-                        notMapped<<useless<<endl<<read<<endl;
+                        notMapped<<useless<<endl<<reversecomplement(read)<<endl;
                     } else {
                         notMapped<<useless<<endl<<"not_aligned"<<endl;
                     }
