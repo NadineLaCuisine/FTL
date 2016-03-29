@@ -17,13 +17,16 @@ int main(int argc, char ** argv){
 		cout<<"-x : reference file (ecoliref.fa)"<<endl;
 		cout<<"-k : size of anchor (31)"<<endl;
 		cout<<"-m : max missmatch (2)"<<endl;
+                cout<<"-c : output unaligned reads sequence instead of 'not_aligned'"<<endl;
+
 		return 0;
 	}
-	string refFile("ecoliref.fa"),seq,ref,readFile("minicoli.fa");
+        string refFile("ecoliref.fa"),seq,ref,readFile("minicoli.fa"), tempAlign;
 	uint k(31);
 	uint maxMiss(2);
+        bool notAlignedSequence(false);
 	char c;
-	while ((c = getopt (argc, argv, "u:k:x:m:")) != -1){
+        while ((c = getopt (argc, argv, "u:k:x:m:c:")) != -1){
 		switch(c){
 			case 'u':
 				readFile=optarg;
@@ -37,6 +40,12 @@ int main(int argc, char ** argv){
 			case 'm':
 				maxMiss=stoi(optarg);
 			break;
+                        case 'c':
+                                tempAlign = optarg;
+                                if (tempAlign == "TRUE" or tempAlign == "True" or tempAlign == "true" or tempAlign == "T" or tempAlign == "t"){
+                                    notAlignedSequence = true;
+                                }
+                        break;
 		}
 	}
 	ifstream in(refFile);
@@ -49,7 +58,7 @@ int main(int argc, char ** argv){
 	fillIndex(refFile, k, kmer2pos);
 	cout<<"Mapping "<<readFile<<endl;
 	auto startChrono=chrono::system_clock::now();
-	uint nbread(mapReadFile(readFile,k,kmer2pos, ref,maxMiss));
+        uint nbread(mapReadFile(readFile,k,kmer2pos, ref,maxMiss, notAlignedSequence));
 	auto end=chrono::system_clock::now();auto waitedFor=end-startChrono;
 	cout<<"Mapping took : "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" sec"<<endl;
 	cout<<"Throughout: "<< nbread/(1000*(chrono::duration_cast<chrono::seconds>(waitedFor).count()))<<"k read by second or "
