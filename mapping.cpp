@@ -78,7 +78,7 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 }
 
 
-uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss){
+uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss, bool notAlignedSequence){
     ofstream out("out.fa");
 	ifstream readS(readFile);
 	string read,useless,comp,corrected,correctedRC;
@@ -99,7 +99,15 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
             }else{
                 out<<useless<<endl<<correctedRC<<endl;
             }
-		}
+        } else {
+
+            if (notAlignedSequence){
+                out<<useless<<endl<<read<<endl;
+            } else {
+                out<<useless<<endl<<"not_aligned"<<endl;
+            }
+
+        }
 
 	}
 	cout<<"Reads: "<<readNumber<<endl;
