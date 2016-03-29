@@ -25,9 +25,9 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 	bool end(false);
 	do{
 		kmer2pos[kmer].push_back(i);
-		if(seq[i+k]=='N'){
+		if(seq[i+k]==':'){
 			i+=k;
-			do{++i;}while(seq[i]=='N');
+			do{++i;}while(seq[i]==':');
 			kmerS=(seq2intStranded((seq.substr(i,k))));
 			kmerRC=(rc(kmerS,k));
 			kmer=(min(kmerRC,kmerS));
@@ -78,8 +78,8 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 }
 
 
-uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss){
-    ofstream mapped("mapped.fa"),notMapped("notMapped.fa");
+uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss, bool notAlignedSequence){
+        ofstream mapped("mapped.fa"),notMapped("notMapped.fa");
 	ifstream readS(readFile);
 	string read,useless,comp,corrected,correctedRC;
 	uint mappedRead(0),readNumber(0);
@@ -100,7 +100,11 @@ uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vec
                 mapped<<useless<<endl<<correctedRC<<endl;
             }
 		}else{
-			notMapped<<useless<<endl<<correctedRC<<endl;
+                    if (notAlignedSequence){
+                        notMapped<<useless<<endl<<read<<endl;
+                    } else {
+                        notMapped<<useless<<endl<<"not_aligned"<<endl;
+                    }
 		}
 
 	}
