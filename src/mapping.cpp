@@ -24,7 +24,8 @@ atomic<uint> mappedRead(0),readNumber(0),notMappedRead(0);
 mutex lockOutFile,lockReadFile;
 
 
-void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos){
+
+void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos,uint fraction){
     string seq;
     ifstream readS(refFile);
     getline(readS,seq);
@@ -35,7 +36,9 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
     minimizer kmer(min(kmerRC,kmerS));
     bool end(false);
     do{
-        kmer2pos[kmer].push_back(i);
+		if(i%fraction==0){
+        	kmer2pos[kmer].push_back(i);
+		}
         if(seq[i+k]==':'){
             i+=k;
             do{++i;}while(seq[i]==':');

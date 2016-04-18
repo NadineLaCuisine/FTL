@@ -18,6 +18,7 @@ int main(int argc, char ** argv){
                 cout<<"-k : size of anchor (31)"<<endl;
                 cout<<"-m : max missmatch (2)"<<endl;
 				cout<<"-t : thread number (1)"<<endl;
+				cout<<"-f : index 1/fraction kmer (1)"<<endl;
                 cout<<"-c : output unaligned reads sequence instead of 'not_aligned'"<<endl;
 
                 return 0;
@@ -26,9 +27,10 @@ int main(int argc, char ** argv){
         uint k(31);
         uint maxMiss(2);
 		uint coreNumber(1);
+		uint fraction(1);
         bool notAlignedSequence(false);
         char c;
-        while ((c = getopt (argc, argv, "u:k:x:m:c:t:")) != -1){
+        while ((c = getopt (argc, argv, "u:k:x:m:c:t:f:")) != -1){
                 switch(c){
                         case 'u':
                                 readFile=optarg;
@@ -45,6 +47,9 @@ int main(int argc, char ** argv){
 						case 't':
                                 coreNumber=stoi(optarg);
                         break;
+						case 'f':
+                                fraction=stoi(optarg);
+                        break;
                         case 'c':
                                 tempAlign = optarg;
                                 if (tempAlign == "TRUE" or tempAlign == "True" or tempAlign == "true" or tempAlign == "T" or tempAlign == "t"){
@@ -60,7 +65,7 @@ int main(int argc, char ** argv){
         // unordered_map<kmer,uint8_t> count(kmerCounting(ref, k));
         cout<<"Filling index of "<<refFile<<endl;
         unordered_map<kmer,vector<position>> kmer2pos;
-        fillIndex(refFile, k, kmer2pos);
+        fillIndex(refFile, k, kmer2pos,fraction);
         cout<<"Mapping "<<readFile<<endl;
         auto startChrono=chrono::system_clock::now();
         uint nbread(mapReadFile(readFile,k,kmer2pos, ref,maxMiss, notAlignedSequence,coreNumber));
