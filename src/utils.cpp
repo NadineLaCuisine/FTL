@@ -176,6 +176,21 @@ vector<string> getReads(ifstream& readFile, uint64_t n){
 }
 
 
+vector<string> getReads(ifstream& readFile,uint n,uint& readNumber){
+	vector<string> res;
+	string header,read;
+	for(uint64_t i(0);i<n;++i){
+		getline(readFile,header);
+		getline(readFile,read);
+		if(read.empty()){return res;}
+        ++readNumber;
+		res.push_back(header);
+		res.push_back(read);
+	}
+	return res;
+}
+
+
 string getRead(ifstream& readFile){
 	string read,header,inter;
 	char c;

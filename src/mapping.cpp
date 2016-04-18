@@ -6,11 +6,20 @@
 #include <ctime>
 #include <unordered_map>
 #include <algorithm>
+#include <thread>
+
 #include "utils.h"
 #include "distances.h"
+#include "mapping.h"
 
 
 using namespace std;
+
+
+ofstream mapped("mapped.fa"),notMapped("notMapped.fa");
+ifstream readFile;
+atomic<uint> mappedRead(0),readNumber(0),notMappedRead(0);
+mutex lockOutFile,lockReadFile;
 
 
 void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos){
@@ -43,16 +52,17 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 }
 
 
-uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,string& corrected){
-    minimizer kmerS(seq2intStranded((read.substr(0,k))));
+uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,string& corrected){
+	minimizer kmerS(seq2intStranded((read.substr(0,k))));
     minimizer kmerRC(rc(kmerS,k));
     minimizer kmer(min(kmerRC,kmerS));
     bool end(false),mapped(false);
     uint i(0);
     uint bestScore(maxMiss);
+	vector<position> positions;
     do{
         if(kmer2pos.count(kmer)!=0){
-            vector<position> positions(kmer2pos[kmer]);
+            positions=(kmer2pos.at(kmer));
             for(uint j(0);j<positions.size() and not mapped;++j){
                 int possrt(positions[j]-i);
                 if(possrt>=0){
@@ -79,35 +89,59 @@ uint mapRead(const  string& read,const uint64_t k, unordered_map<kmer,vector<pos
 }
 
 
-uint mapReadFile(const string& readFile,const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss, bool notAlignedSequence){
-    ofstream mapped("mapped.fa"),notMapped("notMapped.fa");
-    ifstream readS(readFile);
+void treatRead(const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,bool notAlignedSequence){
+	string corrected,correctedRC,read,useless,header;
+	while(not readFile.eof()){
+		lockReadFile.lock();
+		getline(readFile,header);
+		getline(readFile,read);
+		lockReadFile.unlock();
+		if(not header.empty()){
+			++readNumber;
+			uint score(mapRead(read,  k, kmer2pos, ref,maxMiss,corrected));
+			uint scorerc(mapRead(reversecomplement(read),  k, kmer2pos, ref,maxMiss,correctedRC));
+			if(min(score,scorerc)<maxMiss){
+				if(score<scorerc){
+					lockOutFile.lock();
+					mapped<<useless<<endl<<corrected<<endl;
+					lockOutFile.unlock();
+				}else{
+					lockOutFile.lock();
+					mapped<<useless<<endl<<reversecomplement(correctedRC)<<endl;
+					lockOutFile.unlock();
+				}
+				mappedRead++;
+			}else{
+				if(notAlignedSequence){
+					lockOutFile.lock();
+					notMapped<<useless<<endl<<read<<endl;
+					lockOutFile.unlock();
+				} else {
+					lockOutFile.lock();
+					notMapped<<useless<<endl<<"not_aligned"<<endl;
+					lockOutFile.unlock();
+				}
+				notMappedRead++;
+			}
+		}else{
+			break;
+		}
+	}
+}
+
+
+uint mapReadFile(const string& readFileName,const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss, bool notAlignedSequence,uint coreNumber){
+    readFile.open(readFileName,ios::in);
     string read,useless,comp,corrected,correctedRC;
-    uint mappedRead(0),readNumber(0);
-    while(!readS.eof()){
-        getline(readS,useless);
-        getline(readS,read);
-        if(read.empty()){break;}
-        ++readNumber;
-    	uint score(mapRead(read,  k, kmer2pos, ref,maxMiss,corrected));
-    	uint scorerc(mapRead(reversecomplement(read),  k, kmer2pos, ref,maxMiss,correctedRC));
-        if(min(score,scorerc)<maxMiss){
-	        ++mappedRead;
-	        if(score<scorerc){
-	    		mapped<<useless<<endl<<corrected<<endl;
-	        }else{
-	            mapped<<useless<<endl<<reversecomplement(correctedRC)<<endl;
-	        }
-    	}else{
-            if (notAlignedSequence){
-                notMapped<<useless<<endl<<read<<endl;
-            } else {
-                notMapped<<useless<<endl<<"not_aligned"<<endl;
-            }
-        }
-    }
+	vector<thread> threads;
+	// treatRead(k, kmer2pos, ref,  maxMiss,  notAlignedSequence);
+	for (size_t i(0); i<coreNumber; ++i){
+		threads.push_back(thread(treatRead,k, kmer2pos, ref, maxMiss,notAlignedSequence));
+	}
+	for(auto &t : threads){t.join();}
     cout<<"Reads: "<<readNumber<<endl;
     cout<<"Reads mapped: "<<mappedRead<<endl;
     cout<<"Percent Read mapped: "<<((10000*(double)mappedRead)/readNumber)/100<<"%"<<endl;
+	cout<<"Reads not mapped: "<<notMappedRead<<endl;
 	return readNumber;
 }

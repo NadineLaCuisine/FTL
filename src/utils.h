@@ -15,7 +15,6 @@ using namespace std;
 
 
 typedef uint64_t minimizer;
-typedef uint32_t readNumber;
 typedef uint32_t position;
 typedef uint64_t kmer;
 
@@ -38,6 +37,7 @@ void readCounting(const string& readFile);
 void updateMinimizerRC(minimizer&	min, char nuc, uint64_t k);
 void updateMinimizer(minimizer&	min, char nuc, uint64_t k);
 minimizer seq2intStranded(const string& seq);
+vector<string> getReads(ifstream& readFile,uint n,uint& readNumber);
 
 
 #endif

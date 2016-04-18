@@ -1,6 +1,6 @@
 CC=/usr/bin/g++
 # CC=g++
-CFLAGS=  -Wall  -Ofast -std=c++11 -march=native -pipe
+CFLAGS=  -Wall  -Ofast -std=c++11 -march=native -pipe -flto -pthread
 LDFLAGS= -pthread -pipe -flto
 
 
@@ -50,7 +50,7 @@ clean:
 	rm -rf $(BUILD)/*.o
 	rm -rf $(BIN)/$(TARGET)
 
-init: 
+init:
 	mkdir -p $(BUILD) $(BIN)
 
 rebuild: clean $(TARGET)
