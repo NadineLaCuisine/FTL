@@ -136,7 +136,7 @@ uint mapReadFile(const string& readFileName,const uint64_t k, const unordered_ma
 	vector<thread> threads;
 	// treatRead(k, kmer2pos, ref,  maxMiss,  notAlignedSequence);
 	for (size_t i(0); i<coreNumber; ++i){
-		threads.push_back(thread(treatRead,k, kmer2pos, ref, maxMiss,notAlignedSequence));
+		threads.push_back(thread(treatRead,k, cref(kmer2pos), cref(ref), maxMiss,notAlignedSequence));
 	}
 	for(auto &t : threads){t.join();}
     cout<<"Reads: "<<readNumber<<endl;
