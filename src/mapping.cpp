@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <algorithm>
 #include <thread>
+#include <mutex>
+#include <atomic>
 
 #include "utils.h"
 #include "distances.h"
@@ -53,20 +55,20 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 
 
 uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,string& corrected){
-	minimizer kmerS(seq2intStranded((read.substr(0,k))));
-    minimizer kmerRC(rc(kmerS,k));
-    minimizer kmer(min(kmerRC,kmerS));
-    bool end(false),mapped(false);
+	minimizer kmer(seq2intStranded((read.substr(0,k))));
+    // minimizer kmerRC(rc(kmerS,k));
+    // minimizer kmer(min(kmerRC,kmerS));
+    bool end(false);
     uint i(0);
     uint bestScore(maxMiss);
 	vector<position> positions;
     do{
         if(kmer2pos.count(kmer)!=0){
             positions=(kmer2pos.at(kmer));
-            for(uint j(0);j<positions.size() and not mapped;++j){
+            for(uint j(0);j<positions.size();++j){
                 int possrt(positions[j]-i);
                 if(possrt>=0){
-                    uint score(distHamming(read,ref.substr(possrt,read.size()+10),maxMiss));//hamming
+                    uint score(distHamming(read,ref.substr(possrt,read.size()),maxMiss));//hamming
     				// uint score(distHammingIndel(read,ref.substr(possrt,read.size()+10),maxMiss));  // hammingindel
     				//~ uint score(nbMismatchesSW(read, ref.substr(possrt,read.size())));  // smith waterman
                     if(score<bestScore){
@@ -77,9 +79,9 @@ uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vect
             }
         }
         if(i+k<read.size()){
-            updateMinimizer(kmerS, read[i+k], k);
-            updateMinimizerRC(kmerRC, read[i+k], k);
-            kmer=min(kmerRC,kmerS);
+            updateMinimizer(kmer, read[i+k], k);
+            // updateMinimizerRC(kmerRC, read[i+k], k);
+            // kmer=min(kmerRC,kmerS);
             ++i;
         }else{
             end=true;
@@ -90,7 +92,7 @@ uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vect
 
 
 void treatRead(const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,bool notAlignedSequence){
-	string corrected,correctedRC,read,useless,header;
+	string corrected,correctedRC,read,header;
 	while(not readFile.eof()){
 		lockReadFile.lock();
 		getline(readFile,header);
@@ -103,22 +105,22 @@ void treatRead(const uint64_t k, const unordered_map<kmer,vector<position>>& kme
 			if(min(score,scorerc)<maxMiss){
 				if(score<scorerc){
 					lockOutFile.lock();
-					mapped<<useless<<endl<<corrected<<endl;
+					mapped<<header<<endl<<corrected<<endl;
 					lockOutFile.unlock();
 				}else{
 					lockOutFile.lock();
-					mapped<<useless<<endl<<reversecomplement(correctedRC)<<endl;
+					mapped<<header<<endl<<reversecomplement(correctedRC)<<endl;
 					lockOutFile.unlock();
 				}
 				mappedRead++;
 			}else{
 				if(notAlignedSequence){
 					lockOutFile.lock();
-					notMapped<<useless<<endl<<read<<endl;
+					notMapped<<header<<endl<<read<<endl;
 					lockOutFile.unlock();
 				} else {
 					lockOutFile.lock();
-					notMapped<<useless<<endl<<"not_aligned"<<endl;
+					notMapped<<header<<endl<<"not_aligned"<<endl;
 					lockOutFile.unlock();
 				}
 				notMappedRead++;
