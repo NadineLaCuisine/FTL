@@ -55,9 +55,9 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 
 
 uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,string& corrected){
-	minimizer kmer(seq2intStranded((read.substr(0,k))));
-    // minimizer kmerRC(rc(kmerS,k));
-    // minimizer kmer(min(kmerRC,kmerS));
+	minimizer kmerS(seq2intStranded((read.substr(0,k))));
+    minimizer kmerRC(rc(kmerS,k));
+    minimizer kmer(min(kmerRC,kmerS));
     bool end(false);
     uint i(0);
     uint bestScore(maxMiss);
@@ -79,9 +79,9 @@ uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vect
             }
         }
         if(i+k<read.size()){
-            updateMinimizer(kmer, read[i+k], k);
-            // updateMinimizerRC(kmerRC, read[i+k], k);
-            // kmer=min(kmerRC,kmerS);
+            updateMinimizer(kmerS, read[i+k], k);
+            updateMinimizerRC(kmerRC, read[i+k], k);
+            kmer=min(kmerRC,kmerS);
             ++i;
         }else{
             end=true;
