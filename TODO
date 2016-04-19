@@ -1,9 +1,6 @@
 TODO for malfoy part -> index/anchoring
--replace hash table with MPHF
 -opti gestion of reversecomplement
--try to index a fraction of the reference kmer to see the impact on mapping
 -replace kmer counting by kmc2
--multhithreading
 -exposing more parameters in command line (hamming vs ssw and maybe missrate)
 
 

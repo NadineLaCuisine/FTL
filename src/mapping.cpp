@@ -13,16 +13,20 @@
 #include "utils.h"
 #include "distances.h"
 #include "mapping.h"
+#include "BBhash.h"
 
 
 using namespace std;
 
 
+typedef boomphf::SingleHashFunctor<uint64_t>  hasher;
+typedef boomphf::mphf<  uint64_t, hasher  > MPHF;
 ofstream mapped("mapped.fa"),notMapped("notMapped.fa");
 ifstream readFile;
 atomic<uint> mappedRead(0),readNumber(0),notMappedRead(0);
 mutex lockOutFile,lockReadFile;
-
+MPHF kmer2Indice;
+vector<vector<position>> indice2Positions;
 
 
 void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vector<position>>& kmer2pos,uint fraction){
@@ -57,6 +61,70 @@ void fillIndex(const string& refFile, const uint64_t k, unordered_map<kmer,vecto
 }
 
 
+void fillMPHF(const string& refFile,uint fraction,uint k,uint coreNumber){
+	vector<uint64_t> kmerIndexed;
+    string seq;
+    ifstream readS(refFile);
+    getline(readS,seq);
+    getline(readS,seq);
+    uint64_t i(0);
+    minimizer kmerS(seq2intStranded((seq.substr(0,k))));
+    minimizer kmerRC(rc(kmerS,k));
+    minimizer kmer(min(kmerRC,kmerS));
+    bool end(false);
+    do{
+		if(i%fraction==0){
+        	kmerIndexed.push_back(kmer);
+		}
+        if(seq[i+k]==':'){
+            i+=k;
+            do{++i;}while(seq[i]==':');
+            kmerS=(seq2intStranded((seq.substr(i,k))));
+            kmerRC=(rc(kmerS,k));
+            kmer=(min(kmerRC,kmerS));
+        }else if(i+k<seq.size()){
+            updateMinimizer(kmerS, seq[i+k], k);
+            updateMinimizerRC(kmerRC, seq[i+k], k);
+            kmer=min(kmerRC,kmerS);
+            ++i;
+        }else{
+            end=true;
+        }
+    }while(!end);
+	auto data_iterator = boomphf::range(static_cast<const uint64_t*>(&((kmerIndexed)[0])), static_cast<const uint64_t*>(&((kmerIndexed)[0]))+kmerIndexed.size());
+	kmer2Indice = boomphf::mphf<uint64_t,hasher>(kmerIndexed.size(),data_iterator,coreNumber,10,false);
+	indice2Positions.resize(kmerIndexed.size());
+	ifstream readS2(refFile);
+	getline(readS2,seq);
+    getline(readS2,seq);
+    i=(0);
+    kmerS=(seq2intStranded((seq.substr(0,k))));
+    kmerRC=(rc(kmerS,k));
+	kmer=(min(kmerRC,kmerS));
+    end=(false);
+    do{
+		if(i%fraction==0){
+        	uint64_t hash(kmer2Indice.lookup(kmer));
+			indice2Positions[hash].push_back(i);
+		}
+        if(seq[i+k]==':'){
+            i+=k;
+            do{++i;}while(seq[i]==':');
+            kmerS=(seq2intStranded((seq.substr(i,k))));
+            kmerRC=(rc(kmerS,k));
+            kmer=(min(kmerRC,kmerS));
+        }else if(i+k<seq.size()){
+            updateMinimizer(kmerS, seq[i+k], k);
+            updateMinimizerRC(kmerRC, seq[i+k], k);
+            kmer=min(kmerRC,kmerS);
+            ++i;
+        }else{
+            end=true;
+        }
+    }while(!end);
+}
+
+
 uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vector<position>>& kmer2pos, const string& ref,uint maxMiss,string& corrected){
 	minimizer kmerS(seq2intStranded((read.substr(0,k))));
     minimizer kmerRC(rc(kmerS,k));
@@ -66,8 +134,11 @@ uint mapRead(const  string& read,const uint64_t k, const unordered_map<kmer,vect
     uint bestScore(maxMiss);
 	vector<position> positions;
     do{
-        if(kmer2pos.count(kmer)!=0){
-            positions=(kmer2pos.at(kmer));
+        // if(kmer2pos.count(kmer)!=0){
+        //     positions=(kmer2pos.at(kmer));
+		uint64_t hash(kmer2Indice.lookup(kmer));
+		if(hash!=ULLONG_MAX){
+			positions=indice2Positions[hash];
             for(uint j(0);j<positions.size();++j){
                 int possrt(positions[j]-i);
                 if(possrt>=0){

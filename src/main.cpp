@@ -61,11 +61,10 @@ int main(int argc, char ** argv){
         ifstream in(refFile);
         getline(in,ref);
         getline(in,ref);
-        // cout<<"Counting "<<k<<"mers "<<endl;
-        // unordered_map<kmer,uint8_t> count(kmerCounting(ref, k));
         cout<<"Filling index of "<<refFile<<endl;
         unordered_map<kmer,vector<position>> kmer2pos;
-        fillIndex(refFile, k, kmer2pos,fraction);
+        // fillIndex(refFile, k, kmer2pos,fraction);
+		fillMPHF(refFile,fraction,k,coreNumber);
         cout<<"Mapping "<<readFile<<endl;
         auto startChrono=chrono::system_clock::now();
         uint nbread(mapReadFile(readFile,k,kmer2pos, ref,maxMiss, notAlignedSequence,coreNumber));
